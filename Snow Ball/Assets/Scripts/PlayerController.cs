@@ -4,104 +4,137 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
-    //touchWait
-    int touchWait = 64;
+    //CAMPOS PLAYER-----------------------------------------------------------------------------------------------------------------------------
 
-    //Camera Main Transform
+    private Rigidbody rbPlayer;
 
-    Transform camTrans ;
+    private bool hitPlayer = false;
 
-    Transform myTrans;
-
-    //Finger touch
-
-    private Vector3 fTouch;
+    //CAMPOS SERIALIZADOS-----------------------------------------------------------------------------------------------------------------------
 
     //Cadencia de disparo.
-    public float fireRate = 0;
-    //Desfase en el apuntado.
-    public float offSetDegree = 90;
-
+    [SerializeField] private float fireRate = 0;
     //Bala que se instancia.
-    public Transform bullet;
+    [SerializeField]
+    private Transform bullet;
     //GameObject donde se instanciara la bala.
-    public Transform firePoint;
-    public LayerMask notToHit;
-
+    [SerializeField]
+    private Transform firePoint;
     //Municion.
-    public int ammunition = 0;
+    [SerializeField] private int ammunition = 0;
+
+    //VARIABLES PRIVADAS--------------------------------------------------------------------------------------------------------------------------
 
     //Valor que se usa para comparar con Time.time.
-    float timeToFire = 0;
+    private float timeToFire = 0;
+    //Finger touch
+    private Vector3 fTouch;
 
-
-    // Use this for initialization
-    void Start () {
-        camTrans = Camera.main.transform;
-        myTrans = this.transform;
+    void Start()
+    {
+        rbPlayer = GetComponent<Rigidbody>();
     }
-	
-	// Update is called once per frame
-	void Update () {
-        
-            if (fireRate == 0)
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.touchCount > 0)
+        {
+            switch (Input.GetTouch(0).phase)
             {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    Shoot();
-                }
+                #region TouchPhase Began
+                case TouchPhase.Began:
+                    Vector3 touchPositionB = Input.GetTouch(0).position;
+                    if (!FingerHit(touchPositionB))
+                    {
+                        LookAtTouch(touchPositionB);
+
+                        if (fireRate == 0)
+                        {
+                            Shoot();
+                        }
+                        else
+                        {
+                            if (Time.time > timeToFire)
+                            {
+                                timeToFire = Time.time + 1 / fireRate;
+                                Shoot();
+                            }
+                        }
+                    }
+                    break;
+                #endregion
+
+                #region TouchPhase Moved
+                case TouchPhase.Moved:
+                    Debug.Log("mueve");
+                    Vector3 touchPositionM = Input.GetTouch(0).position;
+                    Debug.Log(FingerHit(touchPositionM));
+                    if (FingerHit(touchPositionM))
+                    {
+                        rbPlayer.MovePosition(CameraHit(touchPositionM));
+                    }
+                    break;
+                #endregion
+
+                case TouchPhase.Ended:
+                    hitPlayer = false;
+                    break;
             }
-            else
+        }
+    }
+
+    //Comprueba si  el dedo esta tocando al Player
+    bool FingerHit(Vector3 touchXYZ)
+        { 
+        Ray ray = Camera.main.ScreenPointToRay(touchXYZ);
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 100))
+        {
+            if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Player"))
             {
-                if (Input.GetMouseButton(0) && Time.time > timeToFire)
-                {
-                    timeToFire = Time.time + 1 / fireRate;
-                    Shoot();
-                }
+                hitPlayer = true;
             }
             
-
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-        {
-            Vector3 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
-            LookAtTouch(touchDeltaPosition);
-            Debug.Log("Funciona");
-
-            if (fireRate == 0)
-            {
-               
-                    Shoot();
-                
-            }
-            else
-            {
-                if ( Time.time > timeToFire)
-                {
-                    timeToFire = Time.time + 1 / fireRate;
-                    Shoot();
-                }
-            }
-           
         }
 
-        
+        return hitPlayer;
     }
 
+    Vector3 CameraHit(Vector3 touchXYZ)
+    {
+        Ray ray = Camera.main.ScreenPointToRay(touchXYZ);
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 100))
+        {
+            fTouch = hit.point;
+
+        }
+
+        Vector3 tempTouch = fTouch - this.transform.position;
+
+        tempTouch.y = 0;
+
+        tempTouch = this.transform.position + tempTouch;
+
+        return  tempTouch;
+
+    }
+
+    //Hace que el player gire en cualquier dirección
     void LookAtTouch(Vector3 touchXYZ)
     {
 
-        Vector3 tempTouch = new Vector3(touchXYZ.x,touchXYZ.y, camTrans.position.y - myTrans.position.y);
+        Vector3 tempTouch = CameraHit(touchXYZ);
 
-          fTouch = Camera.main.ScreenToWorldPoint(tempTouch);
-
-        fTouch.y = myTrans.position.y;
-
-        myTrans.LookAt(fTouch);
+        this.transform.LookAt(tempTouch, Vector3.up);
     }
 
-
-   
-
+    //Instancia el prefab bullet
     void Shoot()
     {
        Instantiate(bullet, firePoint.position, firePoint.rotation);
