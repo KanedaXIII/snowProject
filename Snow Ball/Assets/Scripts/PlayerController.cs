@@ -1,13 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour {
 
+    
+
     //CAMPOS PLAYER-----------------------------------------------------------------------------------------------------------------------------
 
+    //Rigidbody donde luego cargaremos el rigidbody de player
     private Rigidbody rbPlayer;
 
+    //Navmesh de player
+    private NavMeshAgent agentPlayer;
+
+    //Guarda el valor segun si el jugador a tocado el player o no.
     private bool hitPlayer = false;
 
     //CAMPOS SERIALIZADOS-----------------------------------------------------------------------------------------------------------------------
@@ -16,12 +24,17 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] private float fireRate = 0;
     //Bala que se instancia.
     [SerializeField]
-    private Transform bullet;
+    private Bullet bullet;
     //GameObject donde se instanciara la bala.
     [SerializeField]
     private Transform firePoint;
     //Municion.
     [SerializeField] private int ammunition = 0;
+
+    //VARIABLES PUBLICAS--------------------------------------------------------------------------------------------------------------------------
+
+    //Vida del jugador.
+    public int life=3;
 
     //VARIABLES PRIVADAS--------------------------------------------------------------------------------------------------------------------------
 
@@ -32,7 +45,11 @@ public class PlayerController : MonoBehaviour {
 
     void Start()
     {
-        rbPlayer = GetComponent<Rigidbody>();
+        //Cargamos el RigidBody de player en la variable.
+        rbPlayer = this.gameObject.GetComponent<Rigidbody>();
+
+        //Cargamos el NavMesh de player.
+        agentPlayer = this.gameObject.GetComponent<NavMeshAgent>();
     }
 
     // Update is called once per frame
@@ -47,18 +64,20 @@ public class PlayerController : MonoBehaviour {
                     Vector3 touchPositionB = Input.GetTouch(0).position;
                     if (!FingerHit(touchPositionB))
                     {
+                        float dist = Mathf.Min(Vector3.Distance(this.transform.position,CameraHit(touchPositionB)));
+
                         LookAtTouch(touchPositionB);
 
                         if (fireRate == 0)
                         {
-                            Shoot();
+                            Shoot(dist,CameraHit(touchPositionB));
                         }
                         else
                         {
                             if (Time.time > timeToFire)
                             {
                                 timeToFire = Time.time + 1 / fireRate;
-                                Shoot();
+                                Shoot(dist, CameraHit(touchPositionB));
                             }
                         }
                     }
@@ -67,21 +86,33 @@ public class PlayerController : MonoBehaviour {
 
                 #region TouchPhase Moved
                 case TouchPhase.Moved:
-                    Debug.Log("mueve");
+                    
                     Vector3 touchPositionM = Input.GetTouch(0).position;
-                    Debug.Log(FingerHit(touchPositionM));
+                    
                     if (FingerHit(touchPositionM))
                     {
-                        rbPlayer.MovePosition(CameraHit(touchPositionM));
+                        agentPlayer.SetDestination(CameraHit(touchPositionM));
                     }
                     break;
                 #endregion
 
+                #region TouchPhase Ended
                 case TouchPhase.Ended:
                     hitPlayer = false;
                     break;
+                #endregion
             }
         }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag.Equals("BulletEnemy"))
+        {
+            this.life--;
+            Destroy(other.gameObject);
+        }
+        
     }
 
     //Comprueba si  el dedo esta tocando al Player
@@ -103,6 +134,7 @@ public class PlayerController : MonoBehaviour {
         return hitPlayer;
     }
 
+    //Lugar donde estas posicionando el dedo
     Vector3 CameraHit(Vector3 touchXYZ)
     {
         Ray ray = Camera.main.ScreenPointToRay(touchXYZ);
@@ -135,8 +167,11 @@ public class PlayerController : MonoBehaviour {
     }
 
     //Instancia el prefab bullet
-    void Shoot()
+    void Shoot(float dist, Vector3 touchXYZ)
     {
-       Instantiate(bullet, firePoint.position, firePoint.rotation);
+       Bullet bTemp = Instantiate(bullet, firePoint.position, firePoint.rotation);
+        bTemp.ballMagnitude = dist;
+        bTemp.targetPos = touchXYZ;
+         //this.transform.TransformDirection;
     }
 }

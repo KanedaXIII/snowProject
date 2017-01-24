@@ -8,7 +8,10 @@ using Extensions.System.Colections;
 public class EnemyIA : MonoBehaviour {
 
     //Campos Enemy------------------------------------------------------------------------------------------------------------------------------------------------------
-    
+
+    //Vida de Enemy.
+    [SerializeField]
+    private int life;
     //Rigidbody de Enemy.
     private Rigidbody rbEnemy;
     //NavMeshAgent de Enemy.
@@ -25,7 +28,7 @@ public class EnemyIA : MonoBehaviour {
     private Transform firePoint;
     //Nuestro proyectil o bola de nieve.
     [SerializeField]
-    private Transform bullet;
+    private Bullet bullet;
     //Cadencia de disparo.
     [SerializeField]
     private float fireRate = 0;
@@ -71,9 +74,7 @@ public class EnemyIA : MonoBehaviour {
     {
         
         rTime -= Time.deltaTime;
-
-       
-
+        
         if (rTime < 0)
         {
             randomMove(lTransforms);
@@ -88,6 +89,25 @@ public class EnemyIA : MonoBehaviour {
         }
 
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+
+        if (other.gameObject.tag.Equals("BulletPlayer"))
+        {
+            this.life--;
+            
+            if (life<=0)
+            {
+                Destroy(other.gameObject);
+                Destroy(this.gameObject);
+            }else
+            {
+                Destroy(other.gameObject);
+            }
+        }
+    }
+
     //Movimiento aleatorio de un jugador.
     public void randomMove(List<Transform> lTrans)
     {   
@@ -112,6 +132,8 @@ public class EnemyIA : MonoBehaviour {
         agent.SetDestination(tTemp.position);
 
     }
+
+
     //Disparo del enemigo.
     public void shootBullet()
     {
