@@ -43,9 +43,7 @@ public class Bullet : MonoBehaviour
     {
 
         timeDestroy -= Time.deltaTime;
-
         
-
         if (timeDestroy <= 0)
         {
             Destroy(this.gameObject);
@@ -56,15 +54,18 @@ public class Bullet : MonoBehaviour
     {
         switch (collision.gameObject.name)
         {
+            //Esta parte del switch case solo pertenece a los match tipo Diana.
+            #region DianaMatch
             case "dianaOut":
-
+                GameManager.Instance.scoreMatch += DianaMatch.Instance.dianaOut;
                 break;
             case "dianaMiddle":
-
+                GameManager.Instance.scoreMatch += DianaMatch.Instance.dianaMiddle;
                 break;
             case "dianaCenter":
-
+                GameManager.Instance.scoreMatch += DianaMatch.Instance.dianaCenter;
                 break;
+                #endregion
         }
     }
 }
