@@ -1,11 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
 
+    [HideInInspector]
+    public float scoreMatch;
+
     private static GameManager instance = null;
+
+    private GamePersistentData gamePersistentData;
 
     public bool gameOverB = false;
 
@@ -39,7 +45,22 @@ public class GameManager : MonoBehaviour
     {
         
     }
-    
+
+    //Método para cargar escenas o hacer reset
+    public void loadiScene(string scn)
+    {
+        if (scn == "reset")
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+        else
+        {
+            SceneManager.LoadScene(scn);
+            
+        }
+
+    }
+
     // Métodos de guardado y carga de datos
     public void DeleteData()
     {
