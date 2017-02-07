@@ -8,7 +8,6 @@ public class MatchesEditor : Editor {
         dianaOut_Prop,
         dianaMiddle_Prop,
         dianaCenter_Prop,
-        scoreGoal_Prop,
         dianaOutTime_Prop,
         dianaMiddleTime_Prop,
         dianaCenterTime_Prop,
@@ -22,7 +21,7 @@ public class MatchesEditor : Editor {
 
         typeDiana_Prop = serializedObject.FindProperty("typeDiana");
         #region Level
-        scoreGoal_Prop = serializedObject.FindProperty("scoreGoal");
+       
         #endregion
 
         #region Infinity
@@ -52,8 +51,7 @@ public class MatchesEditor : Editor {
                 EditorGUILayout.PropertyField(dianaCenterTime_Prop);
                 break;
             case DianaMatch.typeDianaList.LevelTime:
-                EditorGUILayout.PropertyField(scoreGoal_Prop);
-
+              
                 break;
             case DianaMatch.typeDianaList.LevelBall:
 

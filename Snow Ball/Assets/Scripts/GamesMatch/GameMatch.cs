@@ -8,21 +8,30 @@ public class GameMatch : MonoBehaviour {
     public string levelName;
 
     public typeMatchList typeMatch;
-    
+
+    //Puntuación que hay que igualar o superar
+    public float scoreGoal;
+
+    public CountDown stopWatch;
+
     #region Variables de contador de tiempo
-    [Header("Time Mode")]
+    [Header("Time")]
     public float maxTime;
 
-    private float currentTime;
+  
+    private bool timeOut = false;
     #endregion
 
-    #region Variables de Score, GameOver, Etc... (No Inspector)
+    #region Variables de contador de intentos
+    [Header("Tries")]
+
+    public int ballTries;
+    #endregion
+
+    #region Variables de Score, SuccesCheck, Etc... (No Inspector)
     [HideInInspector]
     //Comprueba si se ha superado la condición de victoria del nivel
-    public bool succesCheck;
-
-    [HideInInspector]
-    public bool gameOverCheck;
+    public bool successCheck;
 
     [HideInInspector]
     public float score;
@@ -38,36 +47,39 @@ public class GameMatch : MonoBehaviour {
     
         void Start()
         {
-       
-            succesCheck = false;
 
-            gameOverCheck = false;
+            successCheck = false;
 
-
-
+            switch (typeMatch)
+            {
+                case typeMatchList.TimeMode:
+                this.gameObject.AddComponent<CountDown>();
+                stopWatch.OnTime += CheckTime;
+                    break;
+                case typeMatchList.BallMode:
+                    break;
+                case typeMatchList.InfMode:
+                    break;
+            }
+            
         }
 
-        // Update is called once per frame
-        void Update () {
+    public void CheckTime()
+    {
+        timeOut = true;
+    }
 
-
-
-            if (succesCheck)
-            {
-                Debug.Log("Guarda los datos cuando gana");
-            }else if (gameOverCheck)
-            {
-                Debug.Log("Guarda los datos cuando pierde");
-            }
-
-	    }
-
-    public void showSuccesUI()
+    public void CheckScore()
     {
 
     }
 
-    public void showGameOverUI()
+    public void ShowSuccesUI()
+    {
+
+    }
+
+    public void ShowGameOverUI()
     {
 
     }

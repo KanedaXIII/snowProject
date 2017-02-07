@@ -18,13 +18,10 @@ public class DianaMatch : MonoBehaviour {
 
     public float dianaCenter;
     #endregion
-
-   
-
+    
     #region Variables de modo nivel por tiempo
     [Header("Level Time")]
-    //Puntuación que hay que igualar o superar
-    public float scoreGoal;
+   
 
     [HideInInspector]
     public bool modeTimeOn = false;

@@ -66,8 +66,8 @@ public class PlayerController : MonoBehaviour {
                     if (!FingerHit(touchPositionB))
                     {
                         float dist = Mathf.Min(Vector3.Distance(this.transform.position,CameraHit(touchPositionB)));
- 
 
+                      
                         if (fireRate == 0)
                         {
                             LookAtTouch(touchPositionB);
@@ -82,10 +82,16 @@ public class PlayerController : MonoBehaviour {
                                 Shoot(dist, CameraHit(touchPositionB));
                             }
                         }
-                    }else
+                       
+                    }
+
+                   //Movimiento
+                    else
                     {
                         agentPlayer.SetDestination(moveZone);
                     }
+                   
+
                     break;
                 #endregion
 
